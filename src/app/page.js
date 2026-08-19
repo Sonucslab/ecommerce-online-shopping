@@ -1,10 +1,28 @@
 import { Button } from "@/components/ui/button";
+import { AddToCartButton } from "@/components/AddToCartButton";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { ArrowRight, ShoppingCart, Zap, ShieldCheck, Truck } from "lucide-react";
+import { ArrowRight, ShoppingCart, Zap, ShieldCheck, Truck, PackageOpen } from "lucide-react";
+import { getDbConnection } from "@/lib/db";
 
-export default function Home() {
+async function getFeaturedProducts() {
+  try {
+    const pool = await getDbConnection();
+    const [rows] = await pool.execute(
+      `SELECT * FROM Product ORDER BY product_id DESC LIMIT 8`
+    );
+    return rows;
+  } catch (error) {
+    // Only log the message to avoid Next.js crashing when trying to serialize AggregateError
+    console.error("Error fetching featured products:", error?.message || "Database connection failed");
+    return [];
+  }
+}
+
+export default async function Home() {
+  const featuredProducts = await getFeaturedProducts();
+
   return (
     <div className="flex flex-col gap-16 pb-16">
       {/* Hero Section */}
@@ -75,79 +93,38 @@ export default function Home() {
           </Button>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-          {/* Dummy Product 1 */}
-          <Card className="flex flex-col group">
-            <Link href="/products/1" className="flex-1">
-            <div className="h-48 bg-white dark:bg-zinc-900 flex items-center justify-center p-6 rounded-t-xl overflow-hidden">
-               <img src="https://fakestoreapi.com/img/81Zt42ioCgL._AC_SX679_.jpg" alt="Monitor" className="h-full object-contain group-hover:scale-105 transition-transform duration-300" />
-            </div>
-            <CardHeader className="pt-4 px-4 pb-0">
-              <CardTitle className="text-lg line-clamp-1 group-hover:text-primary transition-colors">Samsung 49-Inch CHG90</CardTitle>
-              <CardDescription className="text-primary font-bold text-lg mt-1">$999.99</CardDescription>
-            </CardHeader>
-            </Link>
-            <CardFooter className="p-4 mt-auto">
-              <Button className="w-full">
-                <ShoppingCart className="mr-2 h-4 w-4" /> Add to Cart
-              </Button>
-            </CardFooter>
-          </Card>
-          
-           {/* Dummy Product 2 */}
-          <Card className="flex flex-col group">
-            <Link href="/products/2" className="flex-1">
-            <div className="h-48 bg-white dark:bg-zinc-900 flex items-center justify-center p-6 rounded-t-xl overflow-hidden">
-               <img src="https://fakestoreapi.com/img/81QpkIctqPL._AC_SX679_.jpg" alt="Monitor" className="h-full object-contain group-hover:scale-105 transition-transform duration-300" />
-            </div>
-            <CardHeader className="pt-4 px-4 pb-0">
-              <CardTitle className="text-lg line-clamp-1 group-hover:text-primary transition-colors">Acer SB220Q 21.5"</CardTitle>
-              <CardDescription className="text-primary font-bold text-lg mt-1">$599.00</CardDescription>
-            </CardHeader>
-            </Link>
-            <CardFooter className="p-4 mt-auto">
-              <Button className="w-full">
-                <ShoppingCart className="mr-2 h-4 w-4" /> Add to Cart
-              </Button>
-            </CardFooter>
-          </Card>
-
-           {/* Dummy Product 3 */}
-          <Card className="flex flex-col group">
-            <Link href="/products/3" className="flex-1">
-            <div className="h-48 bg-white dark:bg-zinc-900 flex items-center justify-center p-6 rounded-t-xl overflow-hidden">
-               <img src="https://fakestoreapi.com/img/61IBBVJvSDL._AC_SY879_.jpg" alt="Drive" className="h-full object-contain group-hover:scale-105 transition-transform duration-300" />
-            </div>
-            <CardHeader className="pt-4 px-4 pb-0">
-              <CardTitle className="text-lg line-clamp-1 group-hover:text-primary transition-colors">WD 2TB Elements SSD</CardTitle>
-              <CardDescription className="text-primary font-bold text-lg mt-1">$64.00</CardDescription>
-            </CardHeader>
-            </Link>
-            <CardFooter className="p-4 mt-auto">
-              <Button className="w-full">
-                <ShoppingCart className="mr-2 h-4 w-4" /> Add to Cart
-              </Button>
-            </CardFooter>
-          </Card>
-
-           {/* Dummy Product 4 */}
-          <Card className="flex flex-col group">
-            <Link href="/products/4" className="flex-1">
-            <div className="h-48 bg-white dark:bg-zinc-900 flex items-center justify-center p-6 rounded-t-xl overflow-hidden">
-               <img src="https://fakestoreapi.com/img/61U7T1koQqL._AC_SX679_.jpg" alt="SSD" className="h-full object-contain group-hover:scale-105 transition-transform duration-300" />
-            </div>
-            <CardHeader className="pt-4 px-4 pb-0">
-              <CardTitle className="text-lg line-clamp-1 group-hover:text-primary transition-colors">SanDisk SSD PLUS 1TB</CardTitle>
-              <CardDescription className="text-primary font-bold text-lg mt-1">$109.00</CardDescription>
-            </CardHeader>
-            </Link>
-            <CardFooter className="p-4 mt-auto">
-              <Button className="w-full">
-                <ShoppingCart className="mr-2 h-4 w-4" /> Add to Cart
-              </Button>
-            </CardFooter>
-          </Card>
-        </div>
+        {featuredProducts.length === 0 ? (
+          <div className="text-center py-12 bg-muted/50 rounded-lg border border-dashed">
+             <PackageOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4 opacity-50" />
+             <h3 className="text-lg font-medium">No Products Found</h3>
+             <p className="text-muted-foreground">Make sure you have imported the database schema and sample data.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+            {featuredProducts.map((product) => (
+              <Card key={product.product_id} className="flex flex-col group">
+                <Link href={`/products/${product.product_id}`} className="flex-1">
+                <div className="h-48 bg-white dark:bg-zinc-900 flex items-center justify-center p-6 rounded-t-xl overflow-hidden relative">
+                   {product.image_url ? (
+                     <img src={product.image_url} alt={product.name} className="h-full object-contain group-hover:scale-105 transition-transform duration-300" />
+                   ) : (
+                     <div className="h-full w-full bg-muted flex items-center justify-center">
+                        <span className="text-muted-foreground text-sm">No Image</span>
+                     </div>
+                   )}
+                </div>
+                <CardHeader className="pt-4 px-4 pb-0">
+                  <CardTitle className="text-lg line-clamp-1 group-hover:text-primary transition-colors">{product.name}</CardTitle>
+                  <CardDescription className="text-primary font-bold text-lg mt-1">${Number(product.price).toFixed(2)}</CardDescription>
+                </CardHeader>
+                </Link>
+                <CardFooter className="p-4 mt-auto">
+                  <AddToCartButton productId={product.product_id} stockQty={product.stock_quantity} className="w-full" />
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );

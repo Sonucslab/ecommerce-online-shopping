@@ -1,103 +1,121 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Package, ShoppingCart, DollarSign } from "lucide-react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { getDbConnection } from "@/lib/db";
+import { jwtVerify } from "jose";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
-export default function AdminDashboard() {
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "fallback_secret_key");
+
+async function getAdminStats() {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+    if (!token) return null;
+    
+    const { payload } = await jwtVerify(token, JWT_SECRET);
+    if (payload.role !== "admin") return null;
+
+    const pool = await getDbConnection();
+    
+    // Total Sales
+    const [[{ total_sales }]] = await pool.execute(`SELECT SUM(total_amount) as total_sales FROM \`Order\``);
+    
+    // Total Orders
+    const [[{ total_orders }]] = await pool.execute(`SELECT COUNT(*) as total_orders FROM \`Order\``);
+    
+    // Total Products
+    const [[{ total_products }]] = await pool.execute(`SELECT COUNT(*) as total_products FROM Product`);
+    
+    // Recent Orders
+    const [recent_orders] = await pool.execute(`
+      SELECT o.order_id, o.total_amount, o.status, o.order_date, c.first_name, c.last_name
+      FROM \`Order\` o
+      JOIN Customer c ON o.customer_id = c.customer_id
+      ORDER BY o.order_date DESC
+      LIMIT 5
+    `);
+
+    return {
+      totalSales: parseFloat(total_sales || 0).toFixed(2),
+      totalOrders: total_orders || 0,
+      totalProducts: total_products || 0,
+      recentOrders: recent_orders
+    };
+  } catch (err) {
+    return null;
+  }
+}
+
+export default async function AdminDashboard() {
+  const stats = await getAdminStats();
+
+  if (!stats) {
+    redirect("/login");
+  }
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
-        <Button asChild>
-          <Link href="/products/new">Add New Product</Link>
-        </Button>
+    <div>
+      <h1 className="text-3xl font-bold text-foreground mb-8">Dashboard Overview</h1>
+      
+      {/* Stat Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="bg-card rounded-xl shadow-sm p-6 border">
+          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">Total Sales</h3>
+          <p className="text-3xl font-bold text-primary">${stats.totalSales}</p>
+        </div>
+        <div className="bg-card rounded-xl shadow-sm p-6 border">
+          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">Total Orders</h3>
+          <p className="text-3xl font-bold text-foreground">{stats.totalOrders}</p>
+        </div>
+        <div className="bg-card rounded-xl shadow-sm p-6 border">
+          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">Total Products</h3>
+          <p className="text-3xl font-bold text-foreground">{stats.totalProducts}</p>
+        </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">$45,231.89</div>
-            <p className="text-xs text-muted-foreground">+20.1% from last month</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">Orders</CardTitle>
-            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">+2350</div>
-            <p className="text-xs text-muted-foreground">+180.1% from last month</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">Products</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">142</div>
-            <p className="text-xs text-muted-foreground">+12 new products added</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">Active Users</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">+573</div>
-            <p className="text-xs text-muted-foreground">+201 since last week</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Recent Orders */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Orders</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
-                  <div>
-                    <p className="font-medium">Order #INV00{i}</p>
-                    <p className="text-sm text-muted-foreground">customer{i}@example.com</p>
-                  </div>
-                  <div className="font-medium">${(Math.random() * 500 + 50).toFixed(2)}</div>
-                </div>
+      {/* Recent Orders Table */}
+      <div className="bg-card rounded-xl shadow-sm border overflow-hidden">
+        <div className="px-6 py-4 border-b">
+          <h2 className="text-lg font-semibold text-foreground">Recent Orders</h2>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-muted/50 text-muted-foreground">
+              <tr>
+                <th className="px-6 py-3 font-medium">Order ID</th>
+                <th className="px-6 py-3 font-medium">Customer</th>
+                <th className="px-6 py-3 font-medium">Date</th>
+                <th className="px-6 py-3 font-medium">Status</th>
+                <th className="px-6 py-3 font-medium">Amount</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {stats.recentOrders.map((order) => (
+                <tr key={order.order_id} className="hover:bg-muted/50">
+                  <td className="px-6 py-4 text-foreground font-medium">#{order.order_id}</td>
+                  <td className="px-6 py-4 text-muted-foreground">{order.first_name} {order.last_name}</td>
+                  <td className="px-6 py-4 text-muted-foreground">
+                    {new Date(order.order_date).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                      {order.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-foreground font-medium">
+                    ${parseFloat(order.total_amount).toFixed(2)}
+                  </td>
+                </tr>
               ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Quick Links */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Management</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2 flex flex-col">
-            <Button variant="outline" className="justify-start" asChild>
-              <Link href="/admin/products">Manage Products</Link>
-            </Button>
-            <Button variant="outline" className="justify-start" asChild>
-              <Link href="/admin/users">Manage Users</Link>
-            </Button>
-            <Button variant="outline" className="justify-start" asChild>
-              <Link href="/admin/orders">View All Orders</Link>
-            </Button>
-            <Button variant="outline" className="justify-start" asChild>
-              <Link href="/admin/settings">Store Settings</Link>
-            </Button>
-          </CardContent>
-        </Card>
+              {stats.recentOrders.length === 0 && (
+                <tr>
+                  <td colSpan="5" className="px-6 py-8 text-center text-muted-foreground">
+                    No orders found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

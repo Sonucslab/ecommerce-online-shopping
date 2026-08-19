@@ -5,6 +5,8 @@ import { ShoppingCart, Bolt } from "lucide-react";
 import Link from "next/link";
 
 import { ThemeToggle } from "@/components/theme-toggle";
+import { getSession } from "@/lib/auth";
+import { SignOutButton } from "@/components/SignOutButton";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -15,7 +17,9 @@ export const metadata = {
 
 import { ThemeProvider } from "@/components/theme-provider";
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const session = await getSession();
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
@@ -32,19 +36,31 @@ export default function RootLayout({ children }) {
               <span className="font-bold text-xl tracking-tight">Nexus<span className="text-primary">Electronics</span></span>
             </Link>
             
-            <div className="hidden md:flex gap-6 items-center font-medium">
-              <Link href="/products" className="text-muted-foreground hover:text-primary transition-colors">Products</Link>
-              <Link href="/categories" className="text-muted-foreground hover:text-primary transition-colors">Categories</Link>
+            <div className="hidden md:flex gap-8 items-center font-medium text-sm">
+              <Link href="/products" className="text-muted-foreground hover:text-foreground transition-colors">Shop</Link>
+              <Link href="/products" className="text-muted-foreground hover:text-foreground transition-colors">Deals</Link>
             </div>
 
             <div className="flex items-center gap-2">
-              <Button variant="ghost" asChild className="hidden sm:inline-flex">
-                <Link href="/admin">Admin</Link>
-              </Button>
-              <Button variant="ghost" asChild className="hidden sm:inline-flex">
-                <Link href="/login">Login</Link>
-              </Button>
-              <Button asChild>
+              {session ? (
+                <>
+                  {session.role === 'admin' ? (
+                    <Button variant="ghost" asChild className="hidden sm:inline-flex">
+                      <Link href="/admin">Admin</Link>
+                    </Button>
+                  ) : (
+                    <Button variant="ghost" asChild className="hidden sm:inline-flex">
+                      <Link href="/account">Account</Link>
+                    </Button>
+                  )}
+                  <SignOutButton />
+                </>
+              ) : (
+                <Button variant="ghost" asChild className="hidden sm:inline-flex">
+                  <Link href="/login">Sign In</Link>
+                </Button>
+              )}
+              <Button asChild variant="outline" className="ml-2">
                 <Link href="/cart" className="flex items-center gap-2">
                   <ShoppingCart className="h-4 w-4" />
                   <span className="hidden sm:inline">Cart</span>
@@ -57,7 +73,7 @@ export default function RootLayout({ children }) {
         <main className="min-h-screen bg-muted/20">
           {children}
         </main>
-        <footer className="border-t py-12 bg-background mt-auto">
+        <footer className="border-t py-16 bg-background mt-auto">
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
               <div className="space-y-4">
@@ -73,8 +89,7 @@ export default function RootLayout({ children }) {
                 <h4 className="font-semibold mb-4">Shop</h4>
                 <ul className="space-y-2 text-sm text-muted-foreground">
                   <li><Link href="/products" className="hover:text-primary transition-colors">All Products</Link></li>
-                  <li><Link href="/categories" className="hover:text-primary transition-colors">Categories</Link></li>
-                  <li><Link href="/deals" className="hover:text-primary transition-colors">Special Deals</Link></li>
+                  <li><Link href="/products" className="hover:text-primary transition-colors">Special Deals</Link></li>
                 </ul>
               </div>
               <div>
@@ -93,7 +108,7 @@ export default function RootLayout({ children }) {
                 </ul>
               </div>
             </div>
-            <div className="pt-8 border-t text-center text-sm text-muted-foreground flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="pt-8 text-center text-sm text-muted-foreground flex flex-col md:flex-row justify-between items-center gap-4">
               <p>&copy; {new Date().getFullYear()} Nexus Electronics. All rights reserved.</p>
               <div className="flex gap-4">
                 <Link href="#" className="hover:text-primary transition-colors">Facebook</Link>

@@ -39,6 +39,9 @@ export default function RootLayout({ children }) {
 
             <div className="flex items-center gap-2">
               <Button variant="ghost" asChild className="hidden sm:inline-flex">
+                <Link href="/admin">Admin</Link>
+              </Button>
+              <Button variant="ghost" asChild className="hidden sm:inline-flex">
                 <Link href="/login">Login</Link>
               </Button>
               <Button asChild>

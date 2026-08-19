@@ -77,14 +77,16 @@ export default function Home() {
         
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
           {/* Dummy Product 1 */}
-          <Card className="flex flex-col">
-            <div className="h-48 bg-muted flex items-center justify-center p-6 rounded-t-xl overflow-hidden">
-               <img src="https://fakestoreapi.com/img/81Zt42ioCgL._AC_SX679_.jpg" alt="Monitor" className="h-full object-contain mix-blend-multiply hover:scale-105 transition-transform" />
+          <Card className="flex flex-col group">
+            <Link href="/products/1" className="flex-1">
+            <div className="h-48 bg-white dark:bg-zinc-900 flex items-center justify-center p-6 rounded-t-xl overflow-hidden">
+               <img src="https://fakestoreapi.com/img/81Zt42ioCgL._AC_SX679_.jpg" alt="Monitor" className="h-full object-contain group-hover:scale-105 transition-transform duration-300" />
             </div>
             <CardHeader className="pt-4 px-4 pb-0">
-              <CardTitle className="text-lg line-clamp-1">Samsung 49-Inch CHG90</CardTitle>
+              <CardTitle className="text-lg line-clamp-1 group-hover:text-primary transition-colors">Samsung 49-Inch CHG90</CardTitle>
               <CardDescription className="text-primary font-bold text-lg mt-1">$999.99</CardDescription>
             </CardHeader>
+            </Link>
             <CardFooter className="p-4 mt-auto">
               <Button className="w-full">
                 <ShoppingCart className="mr-2 h-4 w-4" /> Add to Cart
@@ -93,14 +95,16 @@ export default function Home() {
           </Card>
           
            {/* Dummy Product 2 */}
-          <Card className="flex flex-col">
-            <div className="h-48 bg-muted flex items-center justify-center p-6 rounded-t-xl overflow-hidden">
-               <img src="https://fakestoreapi.com/img/81QpkIctqPL._AC_SX679_.jpg" alt="Monitor" className="h-full object-contain mix-blend-multiply hover:scale-105 transition-transform" />
+          <Card className="flex flex-col group">
+            <Link href="/products/2" className="flex-1">
+            <div className="h-48 bg-white dark:bg-zinc-900 flex items-center justify-center p-6 rounded-t-xl overflow-hidden">
+               <img src="https://fakestoreapi.com/img/81QpkIctqPL._AC_SX679_.jpg" alt="Monitor" className="h-full object-contain group-hover:scale-105 transition-transform duration-300" />
             </div>
             <CardHeader className="pt-4 px-4 pb-0">
-              <CardTitle className="text-lg line-clamp-1">Acer SB220Q 21.5"</CardTitle>
+              <CardTitle className="text-lg line-clamp-1 group-hover:text-primary transition-colors">Acer SB220Q 21.5"</CardTitle>
               <CardDescription className="text-primary font-bold text-lg mt-1">$599.00</CardDescription>
             </CardHeader>
+            </Link>
             <CardFooter className="p-4 mt-auto">
               <Button className="w-full">
                 <ShoppingCart className="mr-2 h-4 w-4" /> Add to Cart
@@ -109,14 +113,16 @@ export default function Home() {
           </Card>
 
            {/* Dummy Product 3 */}
-          <Card className="flex flex-col">
-            <div className="h-48 bg-muted flex items-center justify-center p-6 rounded-t-xl overflow-hidden">
-               <img src="https://fakestoreapi.com/img/61IBBVJvSDL._AC_SY879_.jpg" alt="Drive" className="h-full object-contain mix-blend-multiply hover:scale-105 transition-transform" />
+          <Card className="flex flex-col group">
+            <Link href="/products/3" className="flex-1">
+            <div className="h-48 bg-white dark:bg-zinc-900 flex items-center justify-center p-6 rounded-t-xl overflow-hidden">
+               <img src="https://fakestoreapi.com/img/61IBBVJvSDL._AC_SY879_.jpg" alt="Drive" className="h-full object-contain group-hover:scale-105 transition-transform duration-300" />
             </div>
             <CardHeader className="pt-4 px-4 pb-0">
-              <CardTitle className="text-lg line-clamp-1">WD 2TB Elements SSD</CardTitle>
+              <CardTitle className="text-lg line-clamp-1 group-hover:text-primary transition-colors">WD 2TB Elements SSD</CardTitle>
               <CardDescription className="text-primary font-bold text-lg mt-1">$64.00</CardDescription>
             </CardHeader>
+            </Link>
             <CardFooter className="p-4 mt-auto">
               <Button className="w-full">
                 <ShoppingCart className="mr-2 h-4 w-4" /> Add to Cart
@@ -125,14 +131,16 @@ export default function Home() {
           </Card>
 
            {/* Dummy Product 4 */}
-          <Card className="flex flex-col">
-            <div className="h-48 bg-muted flex items-center justify-center p-6 rounded-t-xl overflow-hidden">
-               <img src="https://fakestoreapi.com/img/61U7T1koQqL._AC_SX679_.jpg" alt="SSD" className="h-full object-contain mix-blend-multiply hover:scale-105 transition-transform" />
+          <Card className="flex flex-col group">
+            <Link href="/products/4" className="flex-1">
+            <div className="h-48 bg-white dark:bg-zinc-900 flex items-center justify-center p-6 rounded-t-xl overflow-hidden">
+               <img src="https://fakestoreapi.com/img/61U7T1koQqL._AC_SX679_.jpg" alt="SSD" className="h-full object-contain group-hover:scale-105 transition-transform duration-300" />
             </div>
             <CardHeader className="pt-4 px-4 pb-0">
-              <CardTitle className="text-lg line-clamp-1">SanDisk SSD PLUS 1TB</CardTitle>
+              <CardTitle className="text-lg line-clamp-1 group-hover:text-primary transition-colors">SanDisk SSD PLUS 1TB</CardTitle>
               <CardDescription className="text-primary font-bold text-lg mt-1">$109.00</CardDescription>
             </CardHeader>
+            </Link>
             <CardFooter className="p-4 mt-auto">
               <Button className="w-full">
                 <ShoppingCart className="mr-2 h-4 w-4" /> Add to Cart

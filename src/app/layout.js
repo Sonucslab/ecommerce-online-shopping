@@ -25,8 +25,8 @@ export default function RootLayout({ children }) {
           enableSystem
           disableTransitionOnChange
         >
-        <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="container mx-auto flex h-16 items-center justify-between px-4">
+        <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <nav className="container mx-auto flex h-16 items-center justify-between px-4">
             <Link href="/" className="flex items-center gap-2">
               <Bolt className="h-6 w-6 text-primary" />
               <span className="font-bold text-xl tracking-tight">Nexus<span className="text-primary">Electronics</span></span>
@@ -49,14 +49,55 @@ export default function RootLayout({ children }) {
               </Button>
               <ThemeToggle />
             </div>
-          </div>
-        </nav>
+          </nav>
+        </header>
         <main className="min-h-screen bg-muted/20">
           {children}
         </main>
-        <footer className="border-t py-6 md:py-0 bg-background">
-          <div className="container mx-auto flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row px-4 text-sm text-muted-foreground">
-            <p>&copy; {new Date().getFullYear()} Nexus Electronics. All rights reserved.</p>
+        <footer className="border-t py-12 bg-background mt-auto">
+          <div className="container mx-auto px-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+              <div className="space-y-4">
+                <Link href="/" className="flex items-center gap-2">
+                  <Bolt className="h-6 w-6 text-primary" />
+                  <span className="font-bold text-xl tracking-tight">Nexus<span className="text-primary">Electronics</span></span>
+                </Link>
+                <p className="text-sm text-muted-foreground">
+                  Your one-stop destination for premium electronics, next-gen tech, and unbeatable prices.
+                </p>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-4">Shop</h4>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li><Link href="/products" className="hover:text-primary transition-colors">All Products</Link></li>
+                  <li><Link href="/categories" className="hover:text-primary transition-colors">Categories</Link></li>
+                  <li><Link href="/deals" className="hover:text-primary transition-colors">Special Deals</Link></li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-4">Support</h4>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li><Link href="/contact" className="hover:text-primary transition-colors">Contact Us</Link></li>
+                  <li><Link href="/faq" className="hover:text-primary transition-colors">FAQ</Link></li>
+                  <li><Link href="/shipping" className="hover:text-primary transition-colors">Shipping & Returns</Link></li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-4">Legal</h4>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li><Link href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
+                  <li><Link href="/terms" className="hover:text-primary transition-colors">Terms of Service</Link></li>
+                </ul>
+              </div>
+            </div>
+            <div className="pt-8 border-t text-center text-sm text-muted-foreground flex flex-col md:flex-row justify-between items-center gap-4">
+              <p>&copy; {new Date().getFullYear()} Nexus Electronics. All rights reserved.</p>
+              <div className="flex gap-4">
+                <Link href="#" className="hover:text-primary transition-colors">Facebook</Link>
+                <Link href="#" className="hover:text-primary transition-colors">Twitter</Link>
+                <Link href="#" className="hover:text-primary transition-colors">Instagram</Link>
+              </div>
+            </div>
           </div>
         </footer>
         </ThemeProvider>

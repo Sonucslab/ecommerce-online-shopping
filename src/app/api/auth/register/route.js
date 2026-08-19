@@ -5,11 +5,14 @@ import { cookies } from 'next/headers';
 
 export async function POST(request) {
   try {
-    const { first_name, last_name, email, password, phone, address } = await request.json();
+    const { first_name, last_name, email, password, phone, address, role = 'customer' } = await request.json();
 
     if (!first_name || !last_name || !email || !password) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
+
+    // Ensure role is either customer or admin
+    const accountRole = role === 'admin' ? 'admin' : 'customer';
 
     const pool = await getDbConnection();
     
@@ -21,15 +24,15 @@ export async function POST(request) {
 
     const passwordHash = await hashPassword(password);
     
-    // Create customer (default role 'customer')
+    // Create customer with specified role
     const [result] = await pool.execute(
       'INSERT INTO Customer (first_name, last_name, email, password_hash, phone, address, role) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [first_name, last_name, email, passwordHash, phone || null, address || null, 'customer']
+      [first_name, last_name, email, passwordHash, phone || null, address || null, accountRole]
     );
 
     // Create session token
     const customerId = result.insertId;
-    const sessionToken = await encrypt({ customer_id: customerId, email, role: 'customer' });
+    const sessionToken = await encrypt({ customer_id: customerId, email, role: accountRole });
     
     // Set cookie
     (await cookies()).set('session', sessionToken, {

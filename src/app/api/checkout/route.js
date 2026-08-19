@@ -12,23 +12,24 @@ export async function POST(request) {
   }
 
   const customerId = session.customer_id;
-  const cartIdCookie = (await cookies()).get('cart_id')?.value;
-  
-  if (!cartIdCookie) {
-    return NextResponse.json({ error: 'Your cart is empty' }, { status: 400 });
-  }
-
   let pool;
   try {
     pool = await getDbConnection();
+
+    // Find the cart for this customer
+    const [carts] = await pool.execute('SELECT cart_id FROM Cart WHERE customer_id = ?', [customerId]);
+    if (carts.length === 0) {
+      return NextResponse.json({ error: 'Your cart is empty' }, { status: 400 });
+    }
+    const cartId = carts[0].cart_id;
     
     // Get cart items to calculate total and verify stock
     const [cartItems] = await pool.execute(`
-      SELECT ci.product_id, ci.quantity, p.price, p.stock_qty 
+      SELECT ci.product_id, ci.quantity, p.price, p.stock_quantity 
       FROM CartItem ci
       JOIN Product p ON ci.product_id = p.product_id
       WHERE ci.cart_id = ?
-    `, [cartIdCookie]);
+    `, [cartId]);
 
     if (cartItems.length === 0) {
       return NextResponse.json({ error: 'Your cart is empty' }, { status: 400 });
@@ -36,7 +37,7 @@ export async function POST(request) {
 
     let totalAmount = 0;
     for (const item of cartItems) {
-      if (item.stock_qty < item.quantity) {
+      if (item.stock_quantity < item.quantity) {
         return NextResponse.json({ error: `Insufficient stock for product ID ${item.product_id}` }, { status: 400 });
       }
       totalAmount += parseFloat(item.price) * item.quantity;
@@ -66,7 +67,7 @@ export async function POST(request) {
 
         // Reduce stock in Product
         await connection.execute(
-          'UPDATE Product SET stock_qty = stock_qty - ? WHERE product_id = ?',
+          'UPDATE Product SET stock_quantity = stock_quantity - ? WHERE product_id = ?',
           [item.quantity, item.product_id]
         );
       }
@@ -78,15 +79,11 @@ export async function POST(request) {
       );
 
       // 4. Clear Cart
-      await connection.execute('DELETE FROM CartItem WHERE cart_id = ?', [cartIdCookie]);
-      // Optionally delete the cart itself, or keep it empty
+      await connection.execute('DELETE FROM CartItem WHERE cart_id = ?', [cartId]);
       
       // COMMIT
       await connection.commit();
       connection.release();
-
-      // Clear cart cookie
-      (await cookies()).delete('cart_id');
 
       return NextResponse.json({ success: true, orderId });
     } catch (err) {

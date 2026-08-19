@@ -1,18 +1,11 @@
 import { getDbConnection } from "@/lib/db";
-import { jwtVerify } from "jose";
-import { cookies } from "next/headers";
+import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
-
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "fallback_secret_key");
 
 async function getAdminStats() {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("token")?.value;
-    if (!token) return null;
-    
-    const { payload } = await jwtVerify(token, JWT_SECRET);
-    if (payload.role !== "admin") return null;
+    const session = await getSession();
+    if (!session || session.role !== "admin") return null;
 
     const pool = await getDbConnection();
     

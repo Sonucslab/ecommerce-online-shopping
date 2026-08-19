@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { ShoppingCart, Bolt } from "lucide-react";
 import Link from "next/link";
 
+import { ThemeToggle } from "@/components/theme-toggle";
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
@@ -11,10 +13,18 @@ export const metadata = {
   description: "Modern E-Commerce Store",
 };
 
+import { ThemeProvider } from "@/components/theme-provider";
+
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
         <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="container mx-auto flex h-16 items-center justify-between px-4">
             <Link href="/" className="flex items-center gap-2">
@@ -27,16 +37,17 @@ export default function RootLayout({ children }) {
               <Link href="/categories" className="text-muted-foreground hover:text-primary transition-colors">Categories</Link>
             </div>
 
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" asChild>
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" asChild className="hidden sm:inline-flex">
                 <Link href="/login">Login</Link>
               </Button>
               <Button asChild>
                 <Link href="/cart" className="flex items-center gap-2">
                   <ShoppingCart className="h-4 w-4" />
-                  <span>Cart</span>
+                  <span className="hidden sm:inline">Cart</span>
                 </Link>
               </Button>
+              <ThemeToggle />
             </div>
           </div>
         </nav>
@@ -48,6 +59,7 @@ export default function RootLayout({ children }) {
             <p>&copy; {new Date().getFullYear()} Nexus Electronics. All rights reserved.</p>
           </div>
         </footer>
+        </ThemeProvider>
       </body>
     </html>
   );

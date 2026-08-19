@@ -1,69 +1,146 @@
-import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
+import { ArrowRight, ShoppingCart, Zap, ShieldCheck, Truck } from "lucide-react";
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.js
-            </code>{" "}
-            file.
+    <div className="flex flex-col gap-16 pb-16">
+      {/* Hero Section */}
+      <section className="bg-background py-20 px-4 text-center border-b">
+        <div className="container mx-auto max-w-4xl space-y-6">
+          <Badge variant="secondary" className="mb-4">New Arrivals Just Landed</Badge>
+          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight">
+            Next-Gen Tech, <br /> Delivered Today.
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Discover the latest electronics, smartphones, and accessories. Premium quality with unbeatable prices.
           </p>
+          <div className="flex gap-4 justify-center pt-4">
+            <Button size="lg" asChild>
+              <Link href="/products">
+                Shop Now <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+            <Button size="lg" variant="outline" asChild>
+              <Link href="/categories">View Categories</Link>
+            </Button>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* Features Section */}
+      <section className="container mx-auto px-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <Card>
+            <CardHeader className="text-center pb-2">
+              <Zap className="h-10 w-10 mx-auto text-primary mb-2" />
+              <CardTitle>Lightning Fast</CardTitle>
+            </CardHeader>
+            <CardContent className="text-center text-muted-foreground">
+              Experience unparalleled speed and performance with our latest processors.
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="text-center pb-2">
+              <ShieldCheck className="h-10 w-10 mx-auto text-primary mb-2" />
+              <CardTitle>Secure Payments</CardTitle>
+            </CardHeader>
+            <CardContent className="text-center text-muted-foreground">
+              Your transactions are protected with military-grade encryption.
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="text-center pb-2">
+              <Truck className="h-10 w-10 mx-auto text-primary mb-2" />
+              <CardTitle>Free Shipping</CardTitle>
+            </CardHeader>
+            <CardContent className="text-center text-muted-foreground">
+              Get free standard shipping on all orders over $99 anywhere.
+            </CardContent>
+          </Card>
         </div>
-      </main>
+      </section>
+
+      {/* Featured Products */}
+      <section className="container mx-auto px-4 space-y-8">
+        <div className="flex justify-between items-end">
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight">Featured Products</h2>
+            <p className="text-muted-foreground mt-1">Our most popular premium tech.</p>
+          </div>
+          <Button variant="ghost" asChild>
+            <Link href="/products">View All</Link>
+          </Button>
+        </div>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+          {/* Dummy Product 1 */}
+          <Card className="flex flex-col">
+            <div className="h-48 bg-muted flex items-center justify-center p-6 rounded-t-xl overflow-hidden">
+               <img src="https://fakestoreapi.com/img/81Zt42ioCgL._AC_SX679_.jpg" alt="Monitor" className="h-full object-contain mix-blend-multiply hover:scale-105 transition-transform" />
+            </div>
+            <CardHeader className="pt-4 px-4 pb-0">
+              <CardTitle className="text-lg line-clamp-1">Samsung 49-Inch CHG90</CardTitle>
+              <CardDescription className="text-primary font-bold text-lg mt-1">$999.99</CardDescription>
+            </CardHeader>
+            <CardFooter className="p-4 mt-auto">
+              <Button className="w-full">
+                <ShoppingCart className="mr-2 h-4 w-4" /> Add to Cart
+              </Button>
+            </CardFooter>
+          </Card>
+          
+           {/* Dummy Product 2 */}
+          <Card className="flex flex-col">
+            <div className="h-48 bg-muted flex items-center justify-center p-6 rounded-t-xl overflow-hidden">
+               <img src="https://fakestoreapi.com/img/81QpkIctqPL._AC_SX679_.jpg" alt="Monitor" className="h-full object-contain mix-blend-multiply hover:scale-105 transition-transform" />
+            </div>
+            <CardHeader className="pt-4 px-4 pb-0">
+              <CardTitle className="text-lg line-clamp-1">Acer SB220Q 21.5"</CardTitle>
+              <CardDescription className="text-primary font-bold text-lg mt-1">$599.00</CardDescription>
+            </CardHeader>
+            <CardFooter className="p-4 mt-auto">
+              <Button className="w-full">
+                <ShoppingCart className="mr-2 h-4 w-4" /> Add to Cart
+              </Button>
+            </CardFooter>
+          </Card>
+
+           {/* Dummy Product 3 */}
+          <Card className="flex flex-col">
+            <div className="h-48 bg-muted flex items-center justify-center p-6 rounded-t-xl overflow-hidden">
+               <img src="https://fakestoreapi.com/img/61IBBVJvSDL._AC_SY879_.jpg" alt="Drive" className="h-full object-contain mix-blend-multiply hover:scale-105 transition-transform" />
+            </div>
+            <CardHeader className="pt-4 px-4 pb-0">
+              <CardTitle className="text-lg line-clamp-1">WD 2TB Elements SSD</CardTitle>
+              <CardDescription className="text-primary font-bold text-lg mt-1">$64.00</CardDescription>
+            </CardHeader>
+            <CardFooter className="p-4 mt-auto">
+              <Button className="w-full">
+                <ShoppingCart className="mr-2 h-4 w-4" /> Add to Cart
+              </Button>
+            </CardFooter>
+          </Card>
+
+           {/* Dummy Product 4 */}
+          <Card className="flex flex-col">
+            <div className="h-48 bg-muted flex items-center justify-center p-6 rounded-t-xl overflow-hidden">
+               <img src="https://fakestoreapi.com/img/61U7T1koQqL._AC_SX679_.jpg" alt="SSD" className="h-full object-contain mix-blend-multiply hover:scale-105 transition-transform" />
+            </div>
+            <CardHeader className="pt-4 px-4 pb-0">
+              <CardTitle className="text-lg line-clamp-1">SanDisk SSD PLUS 1TB</CardTitle>
+              <CardDescription className="text-primary font-bold text-lg mt-1">$109.00</CardDescription>
+            </CardHeader>
+            <CardFooter className="p-4 mt-auto">
+              <Button className="w-full">
+                <ShoppingCart className="mr-2 h-4 w-4" /> Add to Cart
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
+      </section>
     </div>
   );
 }

@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 import { getDbConnection } from "@/lib/db";
 import { jwtVerify } from "jose";
 
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "fallback_secret_key");
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "secret-key-for-local-dev-only");
 
 async function verifyAdmin(request) {
-  const token = request.cookies.get("token")?.value;
+  const token = request.cookies.get("session")?.value;
   if (!token) return null;
   try {
     const { payload } = await jwtVerify(token, JWT_SECRET);

@@ -90,7 +90,7 @@ export async function POST(request) {
 
       // 4. Create Payment
       await connection.execute(
-        'INSERT INTO Payment (order_id, amount, payment_method, payment_status) VALUES (?, ?, ?, ?)',
+        'INSERT INTO Payment (order_id, amount, payment_method, status) VALUES (?, ?, ?, ?)',
         [orderId, totalAmount, payment_method, 'Completed']
       );
 

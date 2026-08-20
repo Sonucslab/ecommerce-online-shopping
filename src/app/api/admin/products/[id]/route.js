@@ -21,7 +21,7 @@ export async function PUT(request, { params }) {
   if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
 
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     const { name, description, price, stock_quantity, category_id, image_url } = body;
 
@@ -42,7 +42,7 @@ export async function DELETE(request, { params }) {
   if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
 
   try {
-    const { id } = params;
+    const { id } = await params;
     const pool = await getDbConnection();
     await pool.execute(`DELETE FROM Product WHERE product_id = ?`, [id]);
     return NextResponse.json({ success: true });

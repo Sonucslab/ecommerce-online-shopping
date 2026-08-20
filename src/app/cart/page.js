@@ -5,6 +5,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Trash2, Minus, Plus, ArrowRight, ShoppingCart } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { getCart, updateQuantity as updateCartQuantity, removeFromCart as removeCartItem } from "@/lib/cart";
 
 export default function CartPage() {
   const [cartItems, setCartItems] = useState([]);
@@ -12,45 +13,31 @@ export default function CartPage() {
 
   useEffect(() => {
     fetchCart();
+    
+    // Listen for custom cart event in case we want to re-render when other tabs or components change it
+    const handleCartUpdate = () => fetchCart();
+    window.addEventListener('cartUpdated', handleCartUpdate);
+    
+    return () => {
+      window.removeEventListener('cartUpdated', handleCartUpdate);
+    };
   }, []);
 
-  const fetchCart = async () => {
-    try {
-      const res = await fetch('/api/cart?customer_id=1');
-      if (res.ok) {
-        const data = await res.json();
-        setCartItems(data.items || []);
-      }
-    } catch (error) {
-      console.error("Failed to fetch cart", error);
-    } finally {
-      setLoading(false);
-    }
+  const fetchCart = () => {
+    setCartItems(getCart());
+    setLoading(false);
   };
 
-  const removeItem = async (cartitemId) => {
-    try {
-      await fetch(`/api/cart?cart_item_id=${cartitemId}`, { method: 'DELETE' });
-      fetchCart();
-    } catch (error) {
-      console.error("Failed to remove item", error);
-    }
+  const removeItem = (productId) => {
+    removeCartItem(productId);
+    fetchCart();
   };
 
-  const updateQuantity = async (cartitemId, productId, currentQty, change) => {
+  const updateQuantity = (productId, currentQty, change) => {
     const newQty = currentQty + change;
     if (newQty < 1) return;
-    
-    try {
-      await fetch('/api/cart', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cart_item_id: cartitemId, quantity: newQty })
-      });
-      fetchCart();
-    } catch (error) {
-      console.error("Failed to update quantity", error);
-    }
+    updateCartQuantity(productId, newQty);
+    fetchCart();
   };
 
   const subtotal = cartItems.reduce((acc, item) => acc + (Number(item.price) * item.quantity), 0);
@@ -79,7 +66,7 @@ export default function CartPage() {
           {/* Cart Items List */}
           <div className="flex-1 space-y-4">
             {cartItems.map((item) => (
-              <Card key={item.cart_item_id} className="flex flex-col sm:flex-row p-4 gap-4 items-center sm:items-start group">
+              <Card key={item.product_id} className="flex flex-col sm:flex-row p-4 gap-4 items-center sm:items-start group">
                 <div className="h-24 w-24 bg-white dark:bg-zinc-900 rounded-md p-2 flex-shrink-0 border">
                   {item.image_url ? (
                     <img src={item.image_url} alt={item.name} className="h-full w-full object-contain" />
@@ -93,15 +80,15 @@ export default function CartPage() {
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="flex items-center border rounded-md">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-none border-r" onClick={() => updateQuantity(item.cart_item_id, item.product_id, item.quantity, -1)}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-none border-r" onClick={() => updateQuantity(item.product_id, item.quantity, -1)}>
                       <Minus className="h-4 w-4" />
                     </Button>
                     <span className="w-10 text-center text-sm font-medium">{item.quantity}</span>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-none border-l" onClick={() => updateQuantity(item.cart_item_id, item.product_id, item.quantity, 1)}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-none border-l" onClick={() => updateQuantity(item.product_id, item.quantity, 1)}>
                       <Plus className="h-4 w-4" />
                     </Button>
                   </div>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10" onClick={() => removeItem(item.cart_item_id)}>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10" onClick={() => removeItem(item.product_id)}>
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>

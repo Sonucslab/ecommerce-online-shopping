@@ -4,24 +4,20 @@ import { Button } from "@/components/ui/button";
 import { ShoppingCart } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { addToCart } from "@/lib/cart";
 
-export function AddToCartButton({ productId, stockQty, className }) {
+export function AddToCartButton({ product, stockQty, className }) {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleAddToCart = async () => {
+  const handleAddToCart = () => {
+    if (!product) return;
+    
+    setLoading(true);
     try {
-      setLoading(true);
-      const res = await fetch('/api/cart', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ product_id: productId, quantity: 1, customer_id: 1 })
-      });
-      
-      if (res.ok) {
-        // We could show a toast here
-        router.push('/cart');
-      }
+      addToCart(product, 1);
+      // Optional: Add a toast notification here
+      router.push('/cart');
     } catch (error) {
       console.error("Error adding to cart:", error);
     } finally {

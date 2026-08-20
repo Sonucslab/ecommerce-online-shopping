@@ -89,7 +89,7 @@ export default async function ProductPage({ params }) {
           </div>
 
           <div className="mt-auto pt-8 border-t flex flex-col sm:flex-row gap-4">
-            <AddToCartButton productId={product.product_id} stockQty={product.stock_quantity} />
+            <AddToCartButton product={product} stockQty={product.stock_quantity} />
           </div>
         </div>
       </div>

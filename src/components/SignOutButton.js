@@ -8,8 +8,7 @@ export function SignOutButton() {
 
   const handleSignOut = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
-    router.refresh();
-    router.push('/');
+    window.location.href = '/';
   };
 
   return (

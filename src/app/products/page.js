@@ -96,7 +96,7 @@ export default async function ProductsPage({ searchParams }) {
                   </CardHeader>
                 </Link>
                 <CardFooter className="p-4 mt-auto">
-                  <AddToCartButton productId={product.product_id} stockQty={product.stock_quantity} className="w-full h-10 text-sm" />
+                  <AddToCartButton product={product} stockQty={product.stock_quantity} className="w-full h-10 text-sm" />
                 </CardFooter>
               </Card>
             ))}

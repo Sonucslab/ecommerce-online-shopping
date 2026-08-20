@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CreditCard, CheckCircle2 } from "lucide-react";
+import { getCart, clearCart } from "@/lib/cart";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -13,21 +14,26 @@ export default function CheckoutPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [cartTotal, setCartTotal] = useState(0);
+  const [cartItems, setCartItems] = useState([]);
 
   useEffect(() => {
-    // Fetch cart to show total
-    fetch('/api/cart')
-      .then(res => res.json())
-      .then(data => {
-        if (data.items) {
-          const total = data.items.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
-          setCartTotal(total);
-        }
-      });
+    // Read cart from localStorage
+    const items = getCart();
+    setCartItems(items);
+    if (items.length > 0) {
+      const total = items.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
+      setCartTotal(total);
+    }
   }, []);
 
   const handleCheckout = async (e) => {
     e.preventDefault();
+    
+    if (cartItems.length === 0) {
+      setError("Your cart is empty.");
+      return;
+    }
+    
     setLoading(true);
     setError("");
 
@@ -35,7 +41,10 @@ export default function CheckoutPage() {
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ payment_method: 'credit_card' })
+        body: JSON.stringify({ 
+          payment_method: 'credit_card',
+          cart_items: cartItems 
+        })
       });
 
       const data = await res.json();
@@ -49,6 +58,7 @@ export default function CheckoutPage() {
       }
 
       setSuccess(true);
+      clearCart(); // Clear localStorage cart after successful order
     } catch (err) {
       setError(err.message);
     } finally {

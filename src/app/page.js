@@ -119,7 +119,7 @@ export default async function Home() {
                 </CardHeader>
                 </Link>
                 <CardFooter className="p-4 mt-auto">
-                  <AddToCartButton productId={product.product_id} stockQty={product.stock_quantity} className="w-full" />
+                  <AddToCartButton product={product} stockQty={product.stock_quantity} className="w-full" />
                 </CardFooter>
               </Card>
             ))}

@@ -128,14 +128,13 @@ export default function RegisterPage() {
                   id="role"
                   value={formData.role} 
                   onChange={handleChange}
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>option]:bg-background [&>option]:text-foreground"
                 >
                   <option value="customer">Customer</option>
-                  <option value="admin">Administrator</option>
+                  <option value="admin">Administrator (Seller)</option>
                 </select>
               </div>
             </div>
-
             <div>
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? 'Creating account...' : 'Create account'}

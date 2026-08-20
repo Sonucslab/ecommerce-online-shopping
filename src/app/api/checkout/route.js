@@ -1,67 +1,83 @@
 import { NextResponse } from 'next/server';
 import { getDbConnection } from '@/lib/db';
 import { getSession } from '@/lib/auth';
-import { cookies } from 'next/headers';
 
 export async function POST(request) {
   const session = await getSession();
   
-  // They must be logged in to checkout (but we could allow guest checkout if we wanted, for now let's enforce login)
   if (!session) {
     return NextResponse.json({ error: 'You must be logged in to checkout' }, { status: 401 });
   }
 
   const customerId = session.customer_id;
   let pool;
+  
   try {
+    const { payment_method = 'credit_card', cart_items = [] } = await request.json().catch(() => ({}));
+    
+    if (!cart_items || cart_items.length === 0) {
+      return NextResponse.json({ error: 'Your cart is empty' }, { status: 400 });
+    }
+
     pool = await getDbConnection();
 
-    // Find the cart for this customer
-    const [carts] = await pool.execute('SELECT cart_id FROM Cart WHERE customer_id = ?', [customerId]);
-    if (carts.length === 0) {
-      return NextResponse.json({ error: 'Your cart is empty' }, { status: 400 });
-    }
-    const cartId = carts[0].cart_id;
-    
-    // Get cart items to calculate total and verify stock
-    const [cartItems] = await pool.execute(`
-      SELECT ci.product_id, ci.quantity, p.price, p.stock_quantity 
-      FROM CartItem ci
-      JOIN Product p ON ci.product_id = p.product_id
-      WHERE ci.cart_id = ?
-    `, [cartId]);
-
-    if (cartItems.length === 0) {
-      return NextResponse.json({ error: 'Your cart is empty' }, { status: 400 });
-    }
-
+    // Verify stock and calculate total from DB directly to prevent tampering
     let totalAmount = 0;
-    for (const item of cartItems) {
-      if (item.stock_quantity < item.quantity) {
+    const verifiedItems = [];
+    
+    for (const item of cart_items) {
+      const [productRows] = await pool.execute('SELECT price, stock_quantity FROM Product WHERE product_id = ?', [item.product_id]);
+      if (productRows.length === 0) {
+        return NextResponse.json({ error: `Product ID ${item.product_id} not found` }, { status: 400 });
+      }
+      
+      const product = productRows[0];
+      if (product.stock_quantity < item.quantity) {
         return NextResponse.json({ error: `Insufficient stock for product ID ${item.product_id}` }, { status: 400 });
       }
-      totalAmount += parseFloat(item.price) * item.quantity;
+      
+      totalAmount += parseFloat(product.price) * item.quantity;
+      verifiedItems.push({
+        ...item,
+        price: product.price
+      });
     }
 
-    const { payment_method = 'credit_card' } = await request.json().catch(() => ({}));
+    // Get or Create Cart ID for this customer
+    let cartId;
+    const [carts] = await pool.execute('SELECT cart_id FROM Cart WHERE customer_id = ?', [customerId]);
+    if (carts.length > 0) {
+      cartId = carts[0].cart_id;
+    } else {
+      const [newCart] = await pool.execute('INSERT INTO Cart (customer_id) VALUES (?)', [customerId]);
+      cartId = newCart.insertId;
+    }
 
     // START TRANSACTION
     const connection = await pool.getConnection();
     await connection.beginTransaction();
 
     try {
-      // 1. Create Order
+      // 1. Commit CartItems to the DB to satisfy "Core Tables" rule before the order
+      for (const item of verifiedItems) {
+        await connection.execute(
+          'INSERT INTO CartItem (cart_id, product_id, quantity) VALUES (?, ?, ?)',
+          [cartId, item.product_id, item.quantity]
+        );
+      }
+
+      // 2. Create Order
       const [orderResult] = await connection.execute(
-        'INSERT INTO Orders (customer_id, total_amount, status) VALUES (?, ?, ?)',
+        'INSERT INTO `Order` (customer_id, total_amount, status) VALUES (?, ?, ?)',
         [customerId, totalAmount, 'Processing']
       );
       const orderId = orderResult.insertId;
 
-      // 2. Create OrderItems & Reduce Stock
-      for (const item of cartItems) {
+      // 3. Create OrderItems & Reduce Stock
+      for (const item of verifiedItems) {
         // Insert into OrderItem
         await connection.execute(
-          'INSERT INTO OrderItem (order_id, product_id, quantity, unit_price) VALUES (?, ?, ?, ?)',
+          'INSERT INTO OrderItem (order_id, product_id, quantity, price_at_purchase) VALUES (?, ?, ?, ?)',
           [orderId, item.product_id, item.quantity, item.price]
         );
 
@@ -72,13 +88,13 @@ export async function POST(request) {
         );
       }
 
-      // 3. Create Payment
+      // 4. Create Payment
       await connection.execute(
         'INSERT INTO Payment (order_id, amount, payment_method, payment_status) VALUES (?, ?, ?, ?)',
         [orderId, totalAmount, payment_method, 'Completed']
       );
 
-      // 4. Clear Cart
+      // 5. Clear Cart (delete the CartItems we just inserted because the order is placed)
       await connection.execute('DELETE FROM CartItem WHERE cart_id = ?', [cartId]);
       
       // COMMIT

@@ -44,9 +44,15 @@ export async function DELETE(request, { params }) {
   try {
     const { id } = await params;
     const pool = await getDbConnection();
+
+    // Remove dependent rows first to avoid foreign key constraint errors
+    await pool.execute(`DELETE FROM CartItem WHERE product_id = ?`, [id]);
+    await pool.execute(`DELETE FROM OrderItem WHERE product_id = ?`, [id]);
     await pool.execute(`DELETE FROM Product WHERE product_id = ?`, [id]);
+
     return NextResponse.json({ success: true });
   } catch (error) {
-    return NextResponse.json({ error: "Database error" }, { status: 500 });
+    console.error('Delete error:', error);
+    return NextResponse.json({ error: error.message || "Database error" }, { status: 500 });
   }
 }

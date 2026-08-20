@@ -6,6 +6,8 @@ import Link from "next/link";
 import { ArrowRight, Zap, ShieldCheck, Truck, PackageOpen, Camera, Laptop, Smartphone, Headphones, Watch } from "lucide-react";
 import { getDbConnection } from "@/lib/db";
 
+export const dynamic = 'force-dynamic';
+
 async function getProductsByCategories() {
   try {
     const pool = await getDbConnection();
@@ -72,7 +74,7 @@ export default async function Home() {
               </Link>
             </Button>
             <Button size="lg" variant="outline" className="rounded-full h-14 px-8 text-lg bg-background/50 backdrop-blur-sm" asChild>
-              <Link href="/categories">View Categories</Link>
+              <Link href="/products">View Categories</Link>
             </Button>
           </div>
         </div>

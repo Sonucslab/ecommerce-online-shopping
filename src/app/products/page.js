@@ -39,7 +39,7 @@ export default async function ProductsPage({ searchParams }) {
   return (
     <div className="container mx-auto px-4 py-8 flex flex-col md:flex-row gap-8">
       {/* Sidebar Filters */}
-      <aside className="w-full md:w-64 shrink-0 space-y-6">
+      <aside className="w-full md:w-64 shrink-0 space-y-6 md:sticky md:top-24 md:h-[calc(100vh-8rem)] overflow-y-auto pr-4">
         <div>
           <h2 className="text-xl font-bold flex items-center gap-2 mb-4">
             <Filter className="h-5 w-5" /> Filters
@@ -48,14 +48,27 @@ export default async function ProductsPage({ searchParams }) {
             <div>
               <h3 className="font-semibold mb-2">Categories</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/products" className="hover:text-primary">All Products</Link></li>
-                {categories.map(cat => (
-                  <li key={cat.category_id}>
-                    <Link href={`/products?category=${cat.category_id}`} className="hover:text-primary">
-                      {cat.name}
-                    </Link>
-                  </li>
-                ))}
+                <li>
+                  <Link 
+                    href="/products" 
+                    className={`hover:text-primary transition-colors ${!category ? 'text-primary font-semibold' : ''}`}
+                  >
+                    All Products
+                  </Link>
+                </li>
+                {categories.map(cat => {
+                  const isActive = category === String(cat.category_id);
+                  return (
+                    <li key={cat.category_id}>
+                      <Link 
+                        href={`/products?category=${cat.category_id}`} 
+                        className={`hover:text-primary transition-colors ${isActive ? 'text-primary font-semibold' : ''}`}
+                      >
+                        {cat.name}
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           </div>
